@@ -1,14 +1,12 @@
-from django.shortcuts import render, redirect, get_object_or_404, HttpResponseRedirect
+from django.shortcuts import redirect, get_object_or_404
 from django.db.models import Q, Count
 from .models import Post, Category, Comment
 from .forms import PostForm, UserProfileForm, CommentForm
 from django.views import generic
 from django.utils import timezone
 from django.http import Http404
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.core.paginator import Paginator
 from django.urls import reverse, reverse_lazy
 
 
@@ -46,11 +44,14 @@ class ProfileView(generic.ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        self.profile = get_object_or_404(User, username=self.kwargs["username"])
+        self.profile = get_object_or_404(
+            User, username=self.kwargs["username"])
         base_query = Post.objects.filter(author=self.profile)
 
         if self.request.user == self.profile:
-            return base_query.annotate(comment_count=Count("comments")).order_by(
+            return base_query.annotate(
+                comment_count=Count("comments")
+            ).order_by(
                 "-pub_date"
             )
 
@@ -142,10 +143,15 @@ class PostEditView(LoginRequiredMixin, generic.UpdateView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
-        return reverse_lazy("blog:post_detail", kwargs={"post_id": self.object.id})
+        return reverse_lazy(
+            "blog:post_detail",
+            kwargs={"post_id": self.object.id}
+        )
 
 
-class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, generic.DeleteView):
+class PostDeleteView(LoginRequiredMixin,
+                     UserPassesTestMixin,
+                     generic.DeleteView):
     model = Post
     template_name = "blog/create.html"
     pk_url_kwarg = "post_id"
@@ -188,12 +194,15 @@ class CommentCreateView(LoginRequiredMixin, generic.CreateView):
 
     def get_success_url(self):
         return (
-            reverse("blog:post_detail", kwargs={"post_id": self.kwargs["post_id"]})
+            reverse("blog:post_detail", kwargs={
+                    "post_id": self.kwargs["post_id"]})
             + f"#comment{self.object.id}"
         )
 
 
-class CommentEditView(LoginRequiredMixin, UserPassesTestMixin, generic.UpdateView):
+class CommentEditView(LoginRequiredMixin,
+                      UserPassesTestMixin,
+                      generic.UpdateView):
     model = Comment
     form_class = CommentForm
     template_name = "blog/comment.html"
@@ -205,12 +214,15 @@ class CommentEditView(LoginRequiredMixin, UserPassesTestMixin, generic.UpdateVie
 
     def get_success_url(self):
         return (
-            reverse("blog:post_detail", kwargs={"post_id": self.object.post.id})
+            reverse("blog:post_detail", kwargs={
+                    "post_id": self.object.post.id})
             + f"#comment_{self.object.id}"
         )
 
 
-class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, generic.DeleteView):
+class CommentDeleteView(LoginRequiredMixin,
+                        UserPassesTestMixin,
+                        generic.DeleteView):
     model = Comment
     template_name = "blog/comment.html"
     pk_url_kwarg = "comment_id"
@@ -220,4 +232,7 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, generic.DeleteV
         return self.request.user == comment.author
 
     def get_success_url(self):
-        return reverse("blog:post_detail", kwargs={"post_id": self.kwargs["post_id"]})
+        return reverse(
+            "blog:post_detail",
+            kwargs={"post_id": self.kwargs["post_id"]}
+        )

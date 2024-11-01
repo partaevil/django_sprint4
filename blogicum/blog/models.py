@@ -25,7 +25,8 @@ class Information(models.Model):
 
 
 class Category(Information):
-    title = models.CharField(max_length=256, blank=False, verbose_name="Заголовок")
+    title = models.CharField(
+        max_length=256, blank=False, verbose_name="Заголовок")
     description = models.TextField(blank=False, verbose_name="Описание")
     slug = models.SlugField(
         unique=True,
@@ -46,7 +47,8 @@ class Category(Information):
 
 
 class Location(Information):
-    name = models.CharField(max_length=256, blank=False, verbose_name="Название места")
+    name = models.CharField(max_length=256, blank=False,
+                            verbose_name="Название места")
 
     def __str__(self):
         return self.name
@@ -59,7 +61,8 @@ class Location(Information):
 
 
 class Post(Information):
-    title = models.CharField(max_length=256, blank=False, verbose_name="Заголовок")
+    title = models.CharField(
+        max_length=256, blank=False, verbose_name="Заголовок")
     text = models.TextField(blank=False, verbose_name="Текст")
     pub_date = models.DateTimeField(
         blank=False,
@@ -68,7 +71,9 @@ class Post(Information):
  можно делать отложенные публикации.",
     )
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, blank=False, verbose_name="Автор публикации"
+        User, on_delete=models.CASCADE,
+        blank=False,
+        verbose_name="Автор публикации"
     )
     location = models.ForeignKey(
         Location,
@@ -107,7 +112,8 @@ class Comment(Information):
         related_name="comments",
         verbose_name="Публикация",
     )
-    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Автор")
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, verbose_name="Автор")
 
     class Meta:
         ordering = ("created_at",)
