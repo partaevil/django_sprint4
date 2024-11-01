@@ -25,8 +25,7 @@ class Information(models.Model):
 
 
 class Category(Information):
-    title = models.CharField(max_length=256, blank=False,
-                             verbose_name="Заголовок")
+    title = models.CharField(max_length=256, blank=False, verbose_name="Заголовок")
     description = models.TextField(blank=False, verbose_name="Описание")
     slug = models.SlugField(
         unique=True,
@@ -36,6 +35,9 @@ class Category(Information):
  разрешены символы латиницы, цифры, дефис и подчёркивание.",
     )
 
+    def __str__(self):
+        return self.title
+
     class Meta:
         db_table = ""
         managed = True
@@ -44,8 +46,10 @@ class Category(Information):
 
 
 class Location(Information):
-    name = models.CharField(max_length=256, blank=False,
-                            verbose_name="Название места")
+    name = models.CharField(max_length=256, blank=False, verbose_name="Название места")
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         db_table = ""
@@ -55,8 +59,7 @@ class Location(Information):
 
 
 class Post(Information):
-    title = models.CharField(max_length=256, blank=False,
-                             verbose_name="Заголовок")
+    title = models.CharField(max_length=256, blank=False, verbose_name="Заголовок")
     text = models.TextField(blank=False, verbose_name="Текст")
     pub_date = models.DateTimeField(
         blank=False,
@@ -65,8 +68,7 @@ class Post(Information):
  можно делать отложенные публикации.",
     )
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, blank=False,
-        verbose_name="Автор публикации"
+        User, on_delete=models.CASCADE, blank=False, verbose_name="Автор публикации"
     )
     location = models.ForeignKey(
         Location,
@@ -82,9 +84,35 @@ class Post(Information):
         verbose_name="Категория",
         null=True,
     )
+    image = models.ImageField(null=True)
+
+    def __str__(self):
+        return self.title
 
     class Meta:
         db_table = ""
+        ordering = ("-pub_date",)
         managed = True
         verbose_name = "публикация"
         verbose_name_plural = "Публикации"
+
+
+class Comment(Information):
+    text = models.TextField(
+        verbose_name="Текст комментария", help_text="Введите текст комментария"
+    )
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="comments",
+        verbose_name="Публикация",
+    )
+    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Автор")
+
+    class Meta:
+        ordering = ("created_at",)
+        verbose_name = "комментарий"
+        verbose_name_plural = "Комментарии"
+
+    def __str__(self):
+        return self.text[:50]
